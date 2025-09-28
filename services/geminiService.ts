@@ -13,7 +13,6 @@ const responseSchema = {
       category: { type: Type.STRING, description: 'A single category like "Dining", "Outdoors", "Arts", "Entertainment", "Cozy Night In".' },
       budget: { type: Type.STRING, description: 'The estimated cost per person, matching the user\'s selected budget range.' },
       address: { type: Type.STRING, description: 'A complete, real-world street address for the activity including street name, number, city, state/province, and postal code in the specified location. This is MANDATORY.' },
-      photo_prompt: { type: Type.STRING, description: 'A comma-separated list of 2-3 simple, descriptive keywords for an image search (e.g., "cozy cafe, latte art").' },
       rating: { type: Type.NUMBER, description: 'An overall rating score out of 5, e.g., 4.5.' },
       review_count: { type: Type.INTEGER, description: 'The number of reviews the place has, e.g., 120.' },
       know_before_you_go: {
@@ -40,8 +39,9 @@ const responseSchema = {
         items: { type: Type.STRING },
         description: 'List of safety/comfort badges like "Public First-Date", "Well-Lit", "ID Verified", "LGBTQ+ Friendly".'
       },
+      photo_prompt: { type: Type.STRING, description: '4-5 descriptive keywords suitable for a stock photo search (e.g., "cozy bookstore cafe night").' },
     },
-    required: ['title', 'description', 'category', 'budget', 'address', 'photo_prompt', 'rating', 'review_count', 'know_before_you_go', 'why_this_is_a_match', 'ice_breaker', 'tags', 'experience_flow', 'duration', 'distance_eta', 'safety_badges'],
+    required: ['title', 'description', 'category', 'budget', 'address', 'rating', 'review_count', 'know_before_you_go', 'why_this_is_a_match', 'ice_breaker', 'tags', 'experience_flow', 'duration', 'distance_eta', 'safety_badges', 'photo_prompt'],
   },
 };
 

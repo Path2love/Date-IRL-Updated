@@ -7,7 +7,7 @@ interface WelcomeScreenProps {
 
 const Feature: React.FC<{ icon: string; title: string; children: React.ReactNode }> = ({ icon, title, children }) => (
   <div className="text-center p-6 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 shadow-lg h-full">
-    <Icon name={icon} className="h-12 w-12 mx-auto mb-4 text-accent" />
+    <Icon name={icon} className="h-12 w-12 mx-auto mb-4 text-burgundy" />
     <h3 className="text-xl font-bold font-serif text-white mb-2">{title}</h3>
     <p className="text-white/80 text-sm">{children}</p>
   </div>
@@ -39,7 +39,7 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onGetStarted }) => {
 
       <button
         onClick={onGetStarted}
-        className="bg-accent text-burgundy font-bold text-xl py-4 px-12 rounded-full hover:bg-white transition-all duration-300 shadow-2xl hover:shadow-accent/50 transform hover:scale-105"
+        className="bg-burgundy text-accent font-bold text-xl py-4 px-12 rounded-full hover:brightness-110 transition-all duration-300 shadow-2xl hover:shadow-burgundy/50 transform hover:scale-105"
       >
         Find My Perfect Date
       </button>

@@ -3,7 +3,6 @@ export interface DateIdea {
   description: string;
   category: string;
   budget: string;
-  photo_prompt: string;
   address: string;
   rating: number;
   review_count: number;
@@ -15,6 +14,7 @@ export interface DateIdea {
   duration: string;
   distance_eta: string;
   safety_badges: string[];
+  photo_prompt: string;
 }
 
 export type UserIntent = 'find_date_spot' | 'find_singles_spots' | 'find_event';

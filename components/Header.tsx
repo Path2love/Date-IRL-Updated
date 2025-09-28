@@ -13,8 +13,8 @@ const Header: React.FC<HeaderProps> = ({ onSignupClick, subscriptionStatus }) =>
       <div className="container mx-auto px-4 py-3">
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <Icon name="logo" className="h-8 w-8 text-white" />
-            <h1 className="text-2xl font-serif font-bold text-white">Date IRL</h1>
+            <Icon name="logo" className="h-8 w-8 text-accent" />
+            <span className="font-serif text-2xl font-bold text-white">Date IRL</span>
           </div>
           <div className="flex items-center gap-4">
             {subscriptionStatus === 'none' ? (
