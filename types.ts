@@ -15,6 +15,7 @@ export interface DateIdea {
   distance_eta: string;
   safety_badges: string[];
   photo_prompt: string;
+  imageUrl?: string;
 }
 
 export type UserIntent = 'find_date_spot' | 'find_singles_spots' | 'find_event';

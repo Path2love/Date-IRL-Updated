@@ -4,7 +4,6 @@ import Icon from './Icon';
 
 interface DateCardProps {
   idea: DateIdea;
-  index: number;
   onSave: (idea: DateIdea) => void;
   isSaved: boolean;
   onFeedback: (ideaTitle: string, feedback: Feedback) => void;
@@ -28,7 +27,7 @@ const Badge: React.FC<{text: string; className?: string}> = ({text, className}) 
     </span>
 );
 
-const DateCard: React.FC<DateCardProps> = ({ idea, index, onSave, isSaved, onFeedback, feedbackState }) => {
+const DateCard: React.FC<DateCardProps> = ({ idea, onSave, isSaved, onFeedback, feedbackState }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   
   useEffect(() => {
@@ -67,19 +66,20 @@ const DateCard: React.FC<DateCardProps> = ({ idea, index, onSave, isSaved, onFee
     }
   };
   
-  // Use the AI-generated photo prompt to fetch a dynamic, relevant image from Unsplash Source.
-  // This provides more variety than static category images and better reflects the specific idea.
-  // The 'sig' parameter with the card's index is added to ensure a unique image is requested
-  // for each card, preventing the browser/CDN from serving the same cached image for similar prompts.
-  const photoKeywords = idea.photo_prompt ? idea.photo_prompt.split(' ').join(',') : idea.category;
-  const imageUrl = `https://source.unsplash.com/800x600/?${encodeURIComponent(photoKeywords)}&sig=${index}`;
+  const imageUrl = idea.imageUrl;
 
 
   return (
     <div className="bg-white dark:bg-stone-800 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 ease-in-out hover:-translate-y-1 flex flex-col h-full group border border-black/10">
       {/* PHOTO HEADER WITH CONSISTENT GRADIENT */}
       <div className={`relative h-48 w-full rounded-t-xl overflow-hidden bg-gradient-to-br from-burgundy to-brand-blue`}>
-        <img src={imageUrl} alt={idea.title} className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 ease-in-out group-hover:scale-110" loading="lazy"/>
+        {imageUrl ? (
+            <img src={imageUrl} alt={idea.title} className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 ease-in-out group-hover:scale-110" loading="lazy"/>
+        ) : (
+            <div className="w-full h-full flex items-center justify-center bg-black/10">
+              <Icon name="logo" className="h-16 w-16 text-white/20 animate-pulse" />
+            </div>
+        )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent/20"></div>
         <div className="absolute bottom-0 left-0 p-4 w-full">
             <p className="text-xs font-bold uppercase text-white tracking-widest [text-shadow:_0_1px_3px_rgb(0_0_0_/_0.8)]">{idea.category}</p>

@@ -24,7 +24,7 @@ const DateCardGrid: React.FC<DateCardGridProps> = ({ dateIdeas, onSave, savedIde
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 animate-fade-in">
       {dateIdeas.map((idea, index) => {
         const isSaved = savedIdeas.some(savedIdea => savedIdea.title === idea.title && savedIdea.address === idea.address);
-        return <DateCard key={`${idea.title}-${index}`} idea={idea} index={index} onSave={onSave} isSaved={isSaved} onFeedback={onFeedback} feedbackState={feedback[idea.title]} />;
+        return <DateCard key={`${idea.title}-${index}`} idea={idea} onSave={onSave} isSaved={isSaved} onFeedback={onFeedback} feedbackState={feedback[idea.title]} />;
       })}
     </div>
   );

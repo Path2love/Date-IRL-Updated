@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import type { DateIdea, ProfileState, UserIntent, SubscriptionStatus, Feedback, FeedbackState } from './types';
 import { INITIAL_PROFILE } from './constants';
-import { generateDateIdeas } from './services/geminiService';
+import { generateDateIdeas, generateImage } from './services/geminiService';
 import Header from './components/Header';
 import Filters from './components/Filters';
 import DateCardGrid from './components/DateCardGrid';
@@ -52,7 +52,21 @@ const App: React.FC = () => {
         throw new Error("API key is missing. Please set the API_KEY environment variable.");
       }
       const ideas = await generateDateIdeas(newProfile, userIntent);
-      setDateIdeas(ideas);
+      
+      const ideasWithImagesPromises = ideas.map(async (idea) => {
+        try {
+          const imagePrompt = `${idea.photo_prompt}, ${idea.category}, ${idea.tags.join(', ')}`;
+          const imageUrl = await generateImage(imagePrompt);
+          return { ...idea, imageUrl };
+        } catch (imgErr) {
+          console.error(`Failed to generate image for "${idea.title}":`, imgErr);
+          return { ...idea, imageUrl: undefined };
+        }
+      });
+      
+      const ideasWithImages = await Promise.all(ideasWithImagesPromises);
+      setDateIdeas(ideasWithImages);
+
     } catch (err) {
       console.error(err);
       setError(err instanceof Error ? err.message : 'An unknown error occurred. Please try again.');
