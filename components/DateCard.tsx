@@ -107,13 +107,26 @@ const DateCard: React.FC<DateCardProps> = ({ idea, onSave, isSaved, onFeedback, 
             </div>
             <div className="flex items-center gap-1.5" title="Budget">
                 <Icon name="cash" className="h-5 w-5 text-green-500"/>
-                <span className="font-bold text-gray-700 dark:text-gray-200">{idea.budget}</span>
+                <span className="font-bold text-gray-700 dark:text-gray-200">{idea.ticket_price || idea.budget}</span>
             </div>
              <div className="flex items-center gap-1.5" title="Duration">
                 <Icon name="clock" className="h-5 w-5 text-blue-500"/>
-                <span className="font-bold text-gray-700 dark:text-gray-200">{idea.duration}</span>
+                <span className="font-bold text-gray-700 dark:text-gray-200">{idea.event_time || idea.duration}</span>
             </div>
         </div>
+
+        {/* EVENT DATE (if present) */}
+        {idea.event_date && (
+          <div className="bg-burgundy/10 border border-burgundy/20 p-3 rounded-lg mb-4">
+            <div className="flex items-center gap-2 text-burgundy dark:text-accent">
+              <Icon name="event" className="h-5 w-5" />
+              <div>
+                <p className="font-bold text-sm">Event Date</p>
+                <p className="text-sm">{new Date(idea.event_date).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* WHY IT'S A MATCH */}
         <div className="bg-stone-100 dark:bg-stone-900 p-3 rounded-lg mb-4">
@@ -166,9 +179,31 @@ const DateCard: React.FC<DateCardProps> = ({ idea, onSave, isSaved, onFeedback, 
                     <Icon name="share" className="h-6 w-6 text-gray-500 dark:text-gray-400"/>
                  </button>
               </div>
-              <button onClick={handleGetDirections} className="bg-burgundy text-white font-bold py-2 px-5 rounded-lg hover:bg-opacity-90 transition-all duration-300 shadow-md border-2 border-black/20 transform group-hover:scale-105 text-base">
-                  Directions
-              </button>
+              <div className="flex gap-2">
+                {idea.booking_link && (
+                  <a
+                    href={idea.booking_link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="bg-teal text-white font-bold py-2 px-4 rounded-lg hover:bg-opacity-90 transition-all duration-300 shadow-md border-2 border-black/20 transform group-hover:scale-105 text-sm"
+                  >
+                    Get Tickets
+                  </a>
+                )}
+                {idea.venue_website && !idea.booking_link && (
+                  <a
+                    href={idea.venue_website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="bg-teal text-white font-bold py-2 px-4 rounded-lg hover:bg-opacity-90 transition-all duration-300 shadow-md border-2 border-black/20 transform group-hover:scale-105 text-sm"
+                  >
+                    Website
+                  </a>
+                )}
+                <button onClick={handleGetDirections} className="bg-burgundy text-white font-bold py-2 px-5 rounded-lg hover:bg-opacity-90 transition-all duration-300 shadow-md border-2 border-black/20 transform group-hover:scale-105 text-base">
+                    Directions
+                </button>
+              </div>
           </div>
         </div>
       </div>

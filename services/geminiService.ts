@@ -40,6 +40,11 @@ const responseSchema = {
         description: 'List of safety/comfort badges like "Public First-Date", "Well-Lit", "ID Verified", "LGBTQ+ Friendly".'
       },
       photo_prompt: { type: Type.STRING, description: '4-5 descriptive keywords suitable for a stock photo search (e.g., "cozy bookstore cafe night").' },
+      venue_website: { type: Type.STRING, description: 'The official website URL for the venue if available (optional).' },
+      event_date: { type: Type.STRING, description: 'For events only: The date of the event in YYYY-MM-DD format (optional).' },
+      event_time: { type: Type.STRING, description: 'For events only: The time of the event, e.g., "7:00 PM" (optional).' },
+      ticket_price: { type: Type.STRING, description: 'For events only: Ticket price range, e.g., "$15-$25" (optional).' },
+      booking_link: { type: Type.STRING, description: 'For events only: URL to purchase tickets or RSVP (optional).' },
     },
     required: ['title', 'description', 'category', 'budget', 'address', 'rating', 'review_count', 'know_before_you_go', 'why_this_is_a_match', 'ice_breaker', 'tags', 'experience_flow', 'duration', 'distance_eta', 'safety_badges', 'photo_prompt'],
   },
@@ -55,7 +60,7 @@ const buildPrompt = (profile: ProfileState, intent: UserIntent) => {
           intentText = 'The user is single and is ACTIVELY looking for places and social environments to meet other like-minded singles. This is NOT for a one-on-one date. The primary goal is to mingle. Therefore, prioritize vibrant, social venues: think lively bars with communal tables, popular coffee shops known for their social scene, group hobby classes (like pottery or dancing), social sports leagues, or community events. The suggestions MUST be actual places or events, not generic advice like "go to a bar". Critically, do NOT suggest quiet, romantic restaurants or any setting designed for an intimate two-person date.';
           break;
         case 'find_event':
-            intentText = 'The user wants to find a specific, timed event happening soon. Prioritize suggestions like concerts, art gallery openings, workshops, food festivals, or live performances. The title should include the event name and date if possible.'
+            intentText = 'The user wants to find a specific, timed event happening soon. Prioritize real, upcoming events like concerts, art gallery openings, workshops, food festivals, comedy shows, or live performances. CRITICALLY IMPORTANT: Include the event_date, event_time, ticket_price, and booking_link fields. The title should be the actual event name. Try to suggest events happening within the next 30 days.'
             break;
         default:
           intentText = 'The user is looking for a general date idea.';

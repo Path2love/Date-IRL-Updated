@@ -16,6 +16,11 @@ export interface DateIdea {
   safety_badges: string[];
   photo_prompt: string;
   imageUrl?: string;
+  event_date?: string;
+  event_time?: string;
+  ticket_price?: string;
+  booking_link?: string;
+  venue_website?: string;
 }
 
 export type UserIntent = 'find_date_spot' | 'find_singles_spots' | 'find_event';

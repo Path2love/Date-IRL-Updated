@@ -10,6 +10,7 @@ import Icon from './components/Icon';
 import SignupModal from './components/SignupModal';
 import WelcomeScreen from './components/WelcomeScreen';
 import Footer from './components/Footer';
+import OnboardingTooltip from './components/OnboardingTooltip';
 
 const App: React.FC = () => {
   const [profile, setProfile] = useState<ProfileState>(INITIAL_PROFILE);
@@ -24,6 +25,7 @@ const App: React.FC = () => {
   const [searchCount, setSearchCount] = useState(0);
   const [isSignupModalOpen, setIsSignupModalOpen] = useState(false);
   const [feedback, setFeedback] = useState<FeedbackState>({});
+  const [showOnboarding, setShowOnboarding] = useState(false);
   
   const handleGetStarted = () => {
     setIsSignupModalOpen(true);
@@ -97,8 +99,9 @@ const App: React.FC = () => {
 
   const handleSubscribe = (plan: 'free' | 'premium') => {
     setSubscriptionStatus(plan);
-    setSearchCount(0); // Reset search count on new subscription
+    setSearchCount(0);
     setIsSignupModalOpen(false);
+    setShowOnboarding(true);
   };
 
   const handleFeedback = useCallback((ideaTitle: string, feedbackType: Feedback) => {
@@ -162,11 +165,16 @@ const App: React.FC = () => {
       <Header onSignupClick={() => setIsSignupModalOpen(true)} subscriptionStatus={subscriptionStatus} />
       
       {isSignupModalOpen && (
-          <SignupModal 
-              onClose={() => setIsSignupModalOpen(false)} 
-              onSubscribe={handleSubscribe} 
+          <SignupModal
+              onClose={() => setIsSignupModalOpen(false)}
+              onSubscribe={handleSubscribe}
           />
       )}
+
+      <OnboardingTooltip
+        isVisible={showOnboarding}
+        onDismiss={() => setShowOnboarding(false)}
+      />
 
       <main className="container mx-auto px-4 py-8">
         <div className="text-center my-8 p-4 bg-white dark:bg-stone-900 border-2 border-brand-blue rounded-xl shadow-lg">

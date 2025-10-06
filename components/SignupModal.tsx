@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Icon from './Icon';
+import { validateCouponCode, redeemCoupon, createOrUpdateSubscription, type Coupon } from '../lib/supabase';
 
 interface SignupModalProps {
   onClose?: () => void;
@@ -9,23 +10,55 @@ interface SignupModalProps {
 const SignupModal: React.FC<SignupModalProps> = ({ onClose, onSubscribe }) => {
   const [showPayment, setShowPayment] = useState(false);
   const [freeEmail, setFreeEmail] = useState('');
+  const [premiumEmail, setPremiumEmail] = useState('');
+  const [couponCode, setCouponCode] = useState('');
+  const [couponStatus, setCouponStatus] = useState<{ valid?: boolean; message?: string; coupon?: Coupon }>({});
+  const [isValidatingCoupon, setIsValidatingCoupon] = useState(false);
 
   const [card, setCard] = useState({ number: '', expiry: '', cvc: ''});
 
-  const handlePremiumSubscribe = (e: React.FormEvent) => {
+  const handleValidateCoupon = async () => {
+    if (!couponCode.trim()) {
+      setCouponStatus({ valid: false, message: 'Please enter a coupon code' });
+      return;
+    }
+
+    setIsValidatingCoupon(true);
+    const result = await validateCouponCode(couponCode);
+    setIsValidatingCoupon(false);
+
+    if (result.valid && result.coupon) {
+      setCouponStatus({ valid: true, message: 'Valid coupon!', coupon: result.coupon });
+    } else {
+      setCouponStatus({ valid: false, message: result.error || 'Invalid coupon' });
+    }
+  };
+
+  const handlePremiumSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!premiumEmail.trim() || !premiumEmail.includes('@')) {
+      alert('Please enter a valid email address.');
+      return;
+    }
     if (card.number.trim() && card.expiry.trim() && card.cvc.trim()) {
+      if (couponStatus.valid && couponStatus.coupon) {
+        await redeemCoupon(couponStatus.coupon.id, premiumEmail);
+        await createOrUpdateSubscription(premiumEmail, 'premium', couponCode);
+      } else {
+        await createOrUpdateSubscription(premiumEmail, 'premium');
+      }
       onSubscribe('premium');
     } else {
       alert("Please fill in all card details.")
     }
   };
 
-  const handleFreeSubscribe = () => {
+  const handleFreeSubscribe = async () => {
     if (freeEmail.trim() === '' || !freeEmail.includes('@')) {
         alert('Please enter a valid email address.');
         return;
     }
+    await createOrUpdateSubscription(freeEmail, 'free');
     onSubscribe('free');
   }
   
@@ -90,6 +123,41 @@ const SignupModal: React.FC<SignupModalProps> = ({ onClose, onSubscribe }) => {
                 <div>
                     <h3 className="text-2xl font-serif text-center mb-4 text-burgundy">Premium Checkout</h3>
                     <form onSubmit={handlePremiumSubscribe} className="space-y-4">
+                        <div>
+                            <label className="block text-sm font-bold text-gray-700 dark:text-gray-300">Email Address</label>
+                            <input type="email" placeholder="your@email.com" value={premiumEmail} onChange={e => setPremiumEmail(e.target.value)} className="w-full p-3 mt-1 bg-stone-100 dark:bg-stone-700 rounded-lg focus:ring-burgundy focus:border-burgundy" required/>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-bold text-gray-700 dark:text-gray-300">Coupon Code (Optional)</label>
+                            <div className="flex gap-2 mt-1">
+                              <input
+                                type="text"
+                                placeholder="DATEIRL2025"
+                                value={couponCode}
+                                onChange={e => setCouponCode(e.target.value.toUpperCase())}
+                                className="flex-1 p-3 bg-stone-100 dark:bg-stone-700 rounded-lg focus:ring-burgundy focus:border-burgundy uppercase"
+                              />
+                              <button
+                                type="button"
+                                onClick={handleValidateCoupon}
+                                disabled={isValidatingCoupon}
+                                className="px-4 py-3 bg-teal text-white rounded-lg hover:bg-teal/90 transition-colors disabled:bg-teal/50 font-semibold text-sm"
+                              >
+                                {isValidatingCoupon ? 'Checking...' : 'Apply'}
+                              </button>
+                            </div>
+                            {couponStatus.message && (
+                              <p className={`text-sm mt-1 ${couponStatus.valid ? 'text-green-600' : 'text-red-600'}`}>
+                                {couponStatus.message}
+                                {couponStatus.valid && couponStatus.coupon && (
+                                  <span className="font-bold">
+                                    {couponStatus.coupon.discount_type === 'free_premium' && ` - ${couponStatus.coupon.discount_value} days free!`}
+                                    {couponStatus.coupon.discount_type === 'premium_discount' && ` - ${couponStatus.coupon.discount_value}% off!`}
+                                  </span>
+                                )}
+                              </p>
+                            )}
+                        </div>
                         <div>
                             <label className="block text-sm font-bold text-gray-700 dark:text-gray-300">Card Number</label>
                             <input type="text" placeholder="•••• •••• •••• 4242" value={card.number} onChange={e => setCard(c => ({...c, number: e.target.value}))} className="w-full p-3 mt-1 bg-stone-100 dark:bg-stone-700 rounded-lg focus:ring-burgundy focus:border-burgundy" required/>
