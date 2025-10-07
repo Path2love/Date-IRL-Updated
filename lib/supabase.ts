@@ -1,13 +1,19 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables');
+let supabase: ReturnType<typeof createClient> | null = null;
+
+if (supabaseUrl && supabaseAnonKey) {
+  try {
+    supabase = createClient(supabaseUrl, supabaseAnonKey);
+  } catch (err) {
+    console.error('Failed to initialize Supabase client:', err);
+  }
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export { supabase };
 
 export interface Coupon {
   id: string;
@@ -42,6 +48,9 @@ export interface UserSubscription {
 }
 
 export const validateCouponCode = async (code: string): Promise<{ valid: boolean; coupon?: Coupon; error?: string }> => {
+  if (!supabase) {
+    return { valid: false, error: 'Database not available' };
+  }
   try {
     const { data, error } = await supabase
       .from('coupons')
@@ -73,6 +82,9 @@ export const validateCouponCode = async (code: string): Promise<{ valid: boolean
 };
 
 export const redeemCoupon = async (couponId: string, userEmail: string): Promise<boolean> => {
+  if (!supabase) {
+    return false;
+  }
   try {
     const { error: redemptionError } = await supabase
       .from('coupon_redemptions')
@@ -105,6 +117,9 @@ export const createOrUpdateSubscription = async (
   subscriptionType: 'free' | 'premium',
   couponCode?: string
 ): Promise<boolean> => {
+  if (!supabase) {
+    return false;
+  }
   try {
     const { error } = await supabase
       .from('user_subscriptions')
