@@ -67,13 +67,15 @@ const Filters: React.FC<FiltersProps> = ({ onSearch, initialProfile, isLoading, 
             if (Array.isArray(currentVal) && multi) {
                 const isPresent = currentVal.includes(value);
 
-                if (category === 'personality' && key === 'archetypes' && !isPresent && currentVal.length >= 3) {
-                  return p;
-                }
-
                 const newArray = isPresent
                     ? currentVal.filter((item: any) => item !== value)
                     : [...currentVal, value];
+
+                if (category === 'personality' && key === 'archetypes' && newArray.length > 3) {
+                  // Prevent selecting more than 3 archetypes.
+                  return p;
+                }
+
                 cat[key] = newArray;
 
             } else if (typeof currentVal === 'boolean') {

@@ -3,13 +3,11 @@ import Icon from './Icon';
 
 interface SignupModalProps {
   onClose?: () => void;
-  onSubscribe: (plan: 'free' | 'premium') => void;
+  onSubscribe: (plan: 'premium') => void;
 }
 
 const SignupModal: React.FC<SignupModalProps> = ({ onClose, onSubscribe }) => {
   const [showPayment, setShowPayment] = useState(false);
-  const [freeEmail, setFreeEmail] = useState('');
-
   const [card, setCard] = useState({ number: '', expiry: '', cvc: ''});
 
   const handlePremiumSubscribe = (e: React.FormEvent) => {
@@ -20,14 +18,6 @@ const SignupModal: React.FC<SignupModalProps> = ({ onClose, onSubscribe }) => {
       alert("Please fill in all card details.")
     }
   };
-
-  const handleFreeSubscribe = () => {
-    if (freeEmail.trim() === '' || !freeEmail.includes('@')) {
-        alert('Please enter a valid email address.');
-        return;
-    }
-    onSubscribe('free');
-  }
   
   const isPremiumSubmitDisabled = !card.number.trim() || !card.expiry.trim() || !card.cvc.trim();
 
@@ -41,32 +31,23 @@ const SignupModal: React.FC<SignupModalProps> = ({ onClose, onSubscribe }) => {
         )}
         
         <div className="p-8">
-            <h2 className="text-3xl font-serif text-center mb-2 text-gray-800 dark:text-white">Join Date IRL</h2>
-            <p className="text-center text-gray-500 dark:text-gray-400 mb-8">Choose your path to better connections.</p>
+            <h2 className="text-3xl font-serif text-center mb-2 text-gray-800 dark:text-white">
+                Upgrade to Premium
+            </h2>
+            <p className="text-center text-gray-500 dark:text-gray-400 mb-8">
+                Choose your path to better connections.
+            </p>
             
             {!showPayment ? (
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Free Plan */}
-                    <div className="p-6 border-2 border-brand-blue rounded-lg text-center flex flex-col">
+                    <div className="p-6 border-2 border-brand-blue rounded-lg text-center flex flex-col bg-gray-50 dark:bg-stone-900/50">
                         <h3 className="text-2xl font-bold font-serif mb-2 text-teal">Free Plan</h3>
-                        <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">Get a taste of curated dating.</p>
+                        <p className="text-teal-800 dark:text-teal-300 font-bold text-sm mb-4">Your Current Plan</p>
                         <ul className="text-left space-y-2 text-sm text-gray-600 dark:text-gray-300 mb-4 flex-grow">
                             <li className="flex items-start gap-2"><Icon name="star" className="h-4 w-4 mt-0.5 text-teal shrink-0"/><span><strong>5 free</strong> AI-powered searches</span></li>
                             <li className="flex items-start gap-2"><Icon name="star" className="h-4 w-4 mt-0.5 text-teal shrink-0"/><span>Save your favorite ideas</span></li>
                         </ul>
-                         <div className="mt-auto space-y-3">
-                            <input 
-                                type="email" 
-                                value={freeEmail}
-                                onChange={(e) => setFreeEmail(e.target.value)}
-                                placeholder="Enter your email" 
-                                className="w-full p-3 bg-stone-100 dark:bg-stone-700 rounded-lg focus:ring-teal focus:border-teal text-sm"
-                                required
-                            />
-                            <button onClick={handleFreeSubscribe} className="w-full bg-teal/20 text-teal-800 dark:text-teal-200 font-bold py-3 px-4 rounded-lg hover:bg-teal/30 transition-colors">
-                                Start for Free
-                            </button>
-                        </div>
                     </div>
 
                     {/* Premium Plan */}

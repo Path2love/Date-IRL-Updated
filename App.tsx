@@ -14,6 +14,7 @@ import Footer from './components/Footer';
 
 const App: React.FC = () => {
   const [profile, setProfile] = useState<ProfileState | null>(null);
+  const [email, setEmail] = useState<string>('');
   const [view, setView] = useState<'loading' | 'welcome' | 'onboarding' | 'main'>('loading');
   const [userIntent, setUserIntent] = useState<UserIntent>('find_date_spot');
   const [dateIdeas, setDateIdeas] = useState<DateIdea[]>([]);
@@ -32,11 +33,17 @@ const App: React.FC = () => {
       const onboardingFlag = localStorage.getItem('onboardingComplete');
       if (onboardingFlag === 'true') {
         const savedProfile = localStorage.getItem('userProfile');
+        const savedEmail = localStorage.getItem('userEmail');
+        
         if (savedProfile) {
           setProfile(JSON.parse(savedProfile));
         } else {
           setProfile(INITIAL_PROFILE);
         }
+        if (savedEmail) {
+            setEmail(savedEmail);
+        }
+        
         setSubscriptionStatus('free'); // Default to free plan after onboarding
         setView('main');
       } else {
@@ -52,21 +59,19 @@ const App: React.FC = () => {
     setView('onboarding');
   };
 
-  const handleOnboardingComplete = (finalProfile: ProfileState) => {
+  const handleOnboardingComplete = (finalProfile: ProfileState, userEmail: string) => {
     try {
       localStorage.setItem('userProfile', JSON.stringify(finalProfile));
+      localStorage.setItem('userEmail', userEmail);
       localStorage.setItem('onboardingComplete', 'true');
-      setProfile(finalProfile);
-      setSubscriptionStatus('free');
-      setView('main');
-      // Automatically trigger the first search for a great first impression
-      handleSearch(finalProfile, 'find_date_spot');
-    } catch(e) {
+    } catch (e) {
       console.error("Could not save to local storage", e);
-      // Fallback to memory state
+    } finally {
       setProfile(finalProfile);
+      setEmail(userEmail);
       setSubscriptionStatus('free');
       setView('main');
+      handleSearch(finalProfile, 'find_date_spot');
     }
   };
 
@@ -147,9 +152,12 @@ const App: React.FC = () => {
     }
   }, [savedIdeas]);
 
-  const handleSubscribe = (plan: 'free' | 'premium') => {
-    setSubscriptionStatus(plan);
-    setSearchCount(0); // Reset search count on new subscription
+  const handleSubscribe = (plan: 'premium') => {
+    // This function now only handles upgrading to premium
+    if (plan === 'premium') {
+        setSubscriptionStatus('premium');
+        setSearchCount(0); // Reset search count on new subscription
+    }
     setIsSignupModalOpen(false);
   };
 
@@ -175,6 +183,7 @@ const App: React.FC = () => {
         try {
             localStorage.removeItem('onboardingComplete');
             localStorage.removeItem('userProfile');
+            localStorage.removeItem('userEmail');
             window.location.reload();
         } catch (e) {
             console.error("Could not clear local storage", e);
@@ -199,15 +208,6 @@ const App: React.FC = () => {
     return <Onboarding onComplete={handleOnboardingComplete} />;
   }
 
-  if (view !== 'main' || !profile) {
-    // Fallback: should not be reached in normal flow
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-white">An unexpected error occurred. Please refresh the page.</p>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen text-gray-800 dark:text-gray-200">
       <Header onSignupClick={handleSignupClick} subscriptionStatus={subscriptionStatus} />
@@ -219,51 +219,53 @@ const App: React.FC = () => {
           />
       )}
 
-      <main className="container mx-auto px-4 py-8">
-        <Filters 
-            onSearch={handleSearch} 
-            initialProfile={profile} 
-            isLoading={isLoading} 
-            userIntent={userIntent}
-            onUserIntentChange={setUserIntent}
-            subscriptionStatus={subscriptionStatus}
-            searchCount={searchCount}
-            onUpgradeClick={handleSignupClick}
-        />
-        
-        <div className="mt-12">
-          {isLoading ? (
-            <div className="flex justify-center items-center h-64">
-              <LoadingSpinner userIntent={userIntent}/>
+      {view === 'main' && profile && (
+        <main className="container mx-auto px-4 py-8">
+            <Filters 
+                onSearch={handleSearch} 
+                initialProfile={profile} 
+                isLoading={isLoading} 
+                userIntent={userIntent}
+                onUserIntentChange={setUserIntent}
+                subscriptionStatus={subscriptionStatus}
+                searchCount={searchCount}
+                onUpgradeClick={handleSignupClick}
+            />
+            
+            <div className="mt-12">
+            {isLoading ? (
+                <div className="flex justify-center items-center h-64">
+                <LoadingSpinner userIntent={userIntent}/>
+                </div>
+            ) : error ? (
+                <div className="text-center p-8 bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300 rounded-lg shadow-md border border-red-500/50">
+                <Icon name="error" className="h-12 w-12 mx-auto mb-4 text-red-500" />
+                <h3 className="text-2xl font-bold font-serif mb-2">Oops! Something went wrong.</h3>
+                <p className="mb-4">{error}</p>
+                <button
+                    onClick={() => handleSearch(profile, userIntent)}
+                    className="bg-burgundy text-white font-bold py-2 px-4 rounded-lg hover:bg-opacity-90 transition-all duration-300"
+                >
+                    Try Again
+                </button>
+                </div>
+            ) : hasSearched ? (
+                <DateCardGrid dateIdeas={dateIdeas} onSave={handleSaveIdea} savedIdeas={savedIdeas} onFeedback={handleFeedback} feedback={feedback} />
+            ) : (
+                <div className="text-center p-8 md:p-16 text-white/70">
+                    <p>Fill out your Date Profile above and click the button to discover intentional experiences curated just for you.</p>
+                </div>
+            )}
             </div>
-          ) : error ? (
-            <div className="text-center p-8 bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300 rounded-lg shadow-md border border-red-500/50">
-              <Icon name="error" className="h-12 w-12 mx-auto mb-4 text-red-500" />
-              <h3 className="text-2xl font-bold font-serif mb-2">Oops! Something went wrong.</h3>
-              <p className="mb-4">{error}</p>
-              <button
-                onClick={() => handleSearch(profile, userIntent)}
-                className="bg-burgundy text-white font-bold py-2 px-4 rounded-lg hover:bg-opacity-90 transition-all duration-300"
-              >
-                Try Again
-              </button>
-            </div>
-          ) : hasSearched ? (
-            <DateCardGrid dateIdeas={dateIdeas} onSave={handleSaveIdea} savedIdeas={savedIdeas} onFeedback={handleFeedback} feedback={feedback} />
-          ) : (
-             <div className="text-center p-8 md:p-16 text-white/70">
-                <p>Fill out your Date Profile above and click the button to discover intentional experiences curated just for you.</p>
-            </div>
-          )}
-        </div>
 
-        {savedIdeas.length > 0 && (
-          <div id="saved-ideas-section" className="mt-16">
-            <h2 className="text-3xl font-serif text-center mb-8 text-white [text-shadow:_0_2px_4px_rgb(0_0_0_/_0.5)]">My Saved Ideas</h2>
-            <DateCardGrid dateIdeas={savedIdeas} onSave={handleSaveIdea} savedIdeas={savedIdeas} onFeedback={handleFeedback} feedback={feedback}/>
-          </div>
-        )}
-      </main>
+            {savedIdeas.length > 0 && (
+            <div id="saved-ideas-section" className="mt-16">
+                <h2 className="text-3xl font-serif text-center mb-8 text-white [text-shadow:_0_2px_4px_rgb(0_0_0_/_0.5)]">My Saved Ideas</h2>
+                <DateCardGrid dateIdeas={savedIdeas} onSave={handleSaveIdea} savedIdeas={savedIdeas} onFeedback={handleFeedback} feedback={feedback}/>
+            </div>
+            )}
+        </main>
+      )}
       <Footer onCycleSub={handleCycleSub} onResetApp={handleResetApp} />
     </div>
   );

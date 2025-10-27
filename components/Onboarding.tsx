@@ -5,7 +5,7 @@ import { GENDERS, ORIENTATIONS, ARCHETYPES, VIBES } from '../constants';
 import Icon from './Icon';
 
 interface OnboardingProps {
-  onComplete: (profile: ProfileState) => void;
+  onComplete: (profile: ProfileState, email: string) => void;
 }
 
 const ProgressBar: React.FC<{ step: number; totalSteps: number }> = ({ step, totalSteps }) => (
@@ -20,10 +20,21 @@ const ProgressBar: React.FC<{ step: number; totalSteps: number }> = ({ step, tot
 const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [profile, setProfile] = useState<ProfileState>(INITIAL_PROFILE);
+  const [email, setEmail] = useState('');
   const totalSteps = 4;
 
   const handleNext = () => {
     // Add validation before proceeding
+    if (currentStep === 1) {
+      // Use a regex for more robust email validation.
+      const emailRegex = new RegExp(
+        /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+      );
+      if (!email.trim() || !emailRegex.test(email)) {
+        alert('Please enter a valid email address.');
+        return;
+      }
+    }
     if (currentStep === 2) {
       if (!profile.identity.age) {
         alert('Please enter your age.');
@@ -44,7 +55,7 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
   };
 
   const handleFinish = () => {
-    onComplete(profile);
+    onComplete(profile, email);
   };
   
   const handleIdentityChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -84,7 +95,16 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
           <div className="text-center animate-fade-in">
             <Icon name="logo" className="h-16 w-16 mx-auto mb-4 text-burgundy" />
             <h1 className="text-4xl font-serif font-bold text-gray-800 dark:text-white mb-4">Welcome to Date IRL</h1>
-            <p className="text-lg text-gray-600 dark:text-gray-300 mb-8">Let's create a profile to help us find the perfect, personalized experiences for you.</p>
+            <p className="text-lg text-gray-600 dark:text-gray-300 mb-8">Let's create your free account to save your profile and start discovering personalized experiences.</p>
+            <input 
+                type="email" 
+                id="email" 
+                value={email} 
+                onChange={(e) => setEmail(e.target.value)} 
+                placeholder="Enter your email address" 
+                className="w-full max-w-md mx-auto p-4 bg-gray-100 dark:bg-stone-700 border border-gray-300 dark:border-stone-600 rounded-lg focus:ring-burgundy focus:border-burgundy transition font-semibold" 
+                required
+            />
           </div>
         )}
 
